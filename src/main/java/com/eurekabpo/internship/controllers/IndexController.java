@@ -1,13 +1,21 @@
 package com.eurekabpo.internship.controllers;
 
+import com.eurekabpo.internship.entities.Task;
 import com.eurekabpo.internship.services.MemoryService;
 import com.eurekabpo.internship.services.NameService;
+import com.eurekabpo.internship.services.TaskService;
 import com.eurekabpo.internship.services.TimeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.sql.Date;
+import java.util.logging.Logger;
 
 @Controller
 public class IndexController {
@@ -21,6 +29,11 @@ public class IndexController {
     @Autowired
     MemoryService memoryService;
 
+    @Autowired
+    TaskService taskService;
+
+    private static Logger logger = Logger.getLogger(IndexController.class.getName());
+
     @GetMapping("/")
     public ModelAndView welcome(Model model)
     {
@@ -29,6 +42,14 @@ public class IndexController {
         model.addAttribute("time", timeService.getCurrTime());
         model.addAttribute("allMem", memoryService.getAllMemory());
         model.addAttribute("freeMem", memoryService.getFreeMemory());
+        model.addAttribute("tasks",taskService.getTasks());
         return new ModelAndView("index.html", model.asMap());
+    }
+
+    @PostMapping("/add-task")
+    public ModelAndView addNewTask(@RequestParam("taskId") long id, @RequestParam("description") String description, @RequestParam("date")Date date, Model model)
+    {
+        taskService.save(new Task(id,description,date));
+        return new ModelAndView("redirect:/");
     }
 }

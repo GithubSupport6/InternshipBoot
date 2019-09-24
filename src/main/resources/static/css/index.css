@@ -19,3 +19,12 @@ body{
     margin-top:250px;
     text-align:center;
 }
+
+.enter-task-container{
+    width:40%;
+    margin: 0 auto;
+}
+
+.enter-task-form{
+    width:100%;
+}

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <link rel="stylesheet" type="text/css" href="../css/index.css">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/index.css}">
     <title>Intership</title>
 </head>
 <body>
@@ -28,6 +28,31 @@
 
     <div class="sub-container">
         <h3>Free memory:  <span th:text = "${freeMem}"></span> bytes</h3>
+    </div>
+
+    <div class="tasks-table-container">
+        <table class="task-table" >
+            <tr th:each = "task: ${tasks}">
+                <td th:text = "${task.taskId}"></td>
+                <td th:text = "${task.description}"></td>
+                <td th:text = "${task.date}"></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class = "enter-task-container">
+        <form method = "post" action = "add-task" modelAttribute = "Task" class="enter-task-form">
+            <fieldset>
+                <legend>New task</legend>
+                <input type = "number" name = "taskId" path = "number">
+                <br>
+                <textarea name = "description" path = "description"></textarea>
+                <br>
+                <input type = "date" name = "date" path = "date"></input>
+                <br>
+                <input type = "submit" value="Add">
+            </fieldset>
+        </form>
     </div>
 </div>
 </body>
