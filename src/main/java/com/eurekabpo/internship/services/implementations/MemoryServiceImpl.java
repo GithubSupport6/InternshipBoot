@@ -11,13 +11,13 @@ public class MemoryServiceImpl implements MemoryService {
 
     @Override
     public String getFreeMemory() {
-        logger.info("Getting free memory ...");
+        logger.info("Getting free memory...");
         return String.valueOf(Runtime.getRuntime().freeMemory());
     }
 
     @Override
     public String getAllMemory() {
-        logger.info("Getting total memory ...");
+        logger.info("Getting total memory...");
         return String.valueOf(Runtime.getRuntime().totalMemory());
     }
 }

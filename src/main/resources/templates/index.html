@@ -2,6 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <link rel="stylesheet" type="text/css" th:href="@{/css/index.css}">
+    <script src="http://yui.yahooapis.com/2.7.0/build/yuiloader/yuiloader-min.js"></script>
+    <script src="http://yui.yahooapis.com/2.7.0/build/event/event-min.js"></script>
     <title>Intership</title>
 </head>
 <body>
@@ -30,30 +32,175 @@
         <h3>Free memory:  <span th:text = "${freeMem}"></span> bytes</h3>
     </div>
 
-    <div class="tasks-table-container">
-        <table class="task-table" >
-            <tr th:each = "task: ${tasks}">
-                <td th:text = "${task.taskId}"></td>
-                <td th:text = "${task.description}"></td>
-                <td th:text = "${task.date}"></td>
-            </tr>
+    <div class = "enter-task-container">
+         <form onsubmit="submitted(); return false" class="enter-task-form">
+              <h2>Add new task</h2>
+              <input type = "number" class="id-input" name = "taskId"  min="1" max="1000" pattern="^[ 0-9]+$" required>
+              <br>
+              <textarea class="descr-input" name = "description" ></textarea>
+              <br>
+             <input type="date" class="date-input" name="date" required/>
+              <br>
+             <input id="add-button" value="Add" type="submit">Button</input>
+          </form>
+
+    </div>
+
+    <div class = "edit-task-container">
+        <form modelAttribute = "Task" class="enter-task-form">
+            <h2>Edit task</h2>
+            <input type = "number" name = "taskId" path = "number" min="1" max="1000" pattern="^[ 0-9]+$">
+            <br>
+            <textarea name = "description" path = "description"></textarea>
+            <br>
+            <input type="date" name="date" path="date"/>
+            <br>
+        </form>
+        <button id="edit-button">Button</button>
+    </div>
+
+    <div id ="data-container">
+        <table>
+
         </table>
     </div>
 
-    <div class = "enter-task-container">
-        <form method = "post" action = "add-task" modelAttribute = "Task" class="enter-task-form">
-            <fieldset>
-                <legend>New task</legend>
-                <input type = "number" name = "taskId" path = "number">
-                <br>
-                <textarea name = "description" path = "description"></textarea>
-                <br>
-                <input type = "date" name = "date" path = "date"></input>
-                <br>
-                <input type = "submit" value="Add">
-            </fieldset>
-        </form>
+    <div>
+        <span class="task-legend">Current tasks</span>
+        <div class="tasks-table-container">
+            <table class="task-table" border="1" id = "task-table">
+                <tbody>
+                <tr class="table-row"  th:each = "task: ${tasks}">
+                    <td th:text = "${task.taskId}"></td>
+                    <td th:text = "${task.description}"></td>
+                    <td th:text = "${task.date}"></td>
+                    <td><button class="edit-button">Edit</button></td>
+                    <td><button class="delete-button">Delete</button></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
-</body>
+<script>
+
+
+var loader = new YAHOO.util.YUILoader({
+    require: ["events","connection","datasource","datatable","get","json","dom"],
+    base: 'http://yui.yahooapis.com/2.7.0/build/',
+    loadOptional: true,
+    onSuccess: function(o) {
+        console.log("Succ loaded!");
+    },
+    onFailure: function(o) {
+      //Короче он все загружает, но почему-то выдает ошибку. Я не понимаю почему  так что костыль здесь.
+        console.log("Fail during load!");
+        //var DataSource = new YAHOO.util.XHRDataSource("http://localhost:8080/get-data");
+        //var ColumnDefs = [
+        //    { key: "taskId", label: "Id" },
+        //    { key: "description", label: "Description" },
+        //    { key: "data", label: "Date" }
+        //];
+
+        //var myDataTable = new YAHOO.widget.DataTable("data-container", ColumnDefs, DataSource);
+
+    },
+    timeout: 0,
+    combine: true
+});
+
+loader.insert();
+
+function submitted()
+{
+  alert("add");
+  var id = YAHOO.util.Dom.getElementsByClassName('id-input')[0].value;
+  alert(id);
+  var descr = YAHOO.util.Dom.getElementsByClassName('descr-input')[0].value;
+  alert(descr);
+  var date = YAHOO.util.Dom.getElementsByClassName('date-input')[0].value;
+  alert(date);
+
+
+  if (!isIdValid(id))
+  {
+    return false;
+  }
+
+  var callback = {
+    success: function(e) {
+        var table = YAHOO.util.Dom.getElementsByClassName('task-table')[0].getElementsByTagName('TBODY')[0];
+        addRow(table,id,descr,date);
+
+        console.log("added succ!");
+    },
+    failure: function(e) {/*failure handler code*/},
+        argument: null
+    };
+    var transaction = YAHOO.util.Connect.asyncRequest('POST', "/add-task", callback, "taskId=" + id + "&description=" + descr + "&date=" + date);
+    return false;
+};
+
+function addRow(table, id, descr, date)
+{
+    console.log(table);
+    var row = document.createElement("TR");
+    table.appendChild(row);
+    var tdId = document.createElement("TD");
+    var tdDescr = document.createElement("TD");
+    var tdDate = document.createElement("TD");
+    var tdEdit =document.createElement("TD");
+    var tdDelete =document.createElement("TD");
+
+    var delBtn = document.createElement('BUTTON');
+    YAHOO.util.Dom.addClass(delBtn, "delete-button");
+    delBtn.innerHTML = "Delete";
+    tdDelete.appendChild(delBtn);
+
+    var editBtn = document.createElement('BUTTON');
+    YAHOO.util.Dom.addClass(editBtn, "edit-button");
+    editBtn.innerHTML = "Edit";
+    tdEdit.appendChild(editBtn);
+
+    row.appendChild(tdId);
+    row.appendChild(tdDescr);
+    row.appendChild(tdDate);
+    row.appendChild(tdEdit);
+    row.appendChild(tdDelete);
+
+    // Наполняем ячейки
+    tdId.innerHTML = id;
+    tdDescr.innerHTML = descr;
+    tdDate.innerHTML = date;
+}
+
+function isIdValid(id)
+{
+    var tbody = YAHOO.util.Dom.getElementsByClassName('task-table')[0].children[0];
+    var ids = [];
+    elements = tbody.children;
+    if (elements.length == 0)
+    {
+        return true;
+    }
+
+    for (let i = 0;i<elements.length;i++)
+    {
+        ids.push(elements[i].children[0].innerHTML);
+    }
+
+    alert(ids);
+    if (ids.includes(id))
+    {
+        return false;
+    }
+    return true;
+}
+
+
+        </script>
+
+    </body>
+
 </html>
+

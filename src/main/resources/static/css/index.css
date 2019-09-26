@@ -1,6 +1,6 @@
 body{
     background-color:#0d78e7;
-    color:#fff; font-family: 'Roboto', sans-serif;
+    color:#fff; font-family: 'Gothic A1', serif;
     margin:0;
 }
 
@@ -21,10 +21,27 @@ body{
 }
 
 .enter-task-container{
-    width:40%;
+    width:100%;
+    border: 6px solid #fff;
     margin: 0 auto;
 }
 
 .enter-task-form{
     width:100%;
+}
+
+.tasks-table-container{
+    width:100%;
+}
+
+.task-legend{
+    text-align:left;
+}
+
+.task-table{
+    width:100%;
+}
+
+.edit-task-container{
+    display:none;
 }

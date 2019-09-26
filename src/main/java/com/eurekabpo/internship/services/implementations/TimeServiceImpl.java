@@ -13,14 +13,14 @@ public class TimeServiceImpl implements TimeService {
 
     @Override
     public String getCurrDate() {
-        logger.info("Getting date ... ");
+        logger.info("Getting date... ");
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEE dd.MM.yyyy");
         return simpleDateFormat.format(new Date());
     }
 
     @Override
     public String getCurrTime() {
-        logger.info("Getting time ... ");
+        logger.info("Getting time... ");
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
         return simpleDateFormat.format(new Date());
     }

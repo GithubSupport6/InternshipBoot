@@ -31,4 +31,10 @@ public class TaskServiceImpl implements TaskService {
         logger.info("Saving new task: (" + task.getTaskId() + " : " + task.getDescription() + " : " + task.getDate() + ")");
         taskRepository.save(task);
     }
+
+    @Override
+    public void delete(long id) {
+        logger.info("Deleting by id: (" + id + ")");
+        taskRepository.deleteById(id);
+    }
 }
