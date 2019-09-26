@@ -41,22 +41,23 @@
               <br>
              <input type="date" class="date-input" name="date" required/>
               <br>
-             <input id="add-button" value="Add" type="submit">Button</input>
+             <input id="add-button" value="Add" type="submit"></input>
           </form>
 
     </div>
 
     <div class = "edit-task-container">
-        <form modelAttribute = "Task" class="enter-task-form">
+        <form onsubmit="edited(); return false" class="enter-task-form">
             <h2>Edit task</h2>
-            <input type = "number" name = "taskId" path = "number" min="1" max="1000" pattern="^[ 0-9]+$">
+            <input type = "number" name = "taskId" path = "number" min="1" max="1000" pattern="^[ 0-9]+$" readonly>
             <br>
             <textarea name = "description" path = "description"></textarea>
             <br>
-            <input type="date" name="date" path="date"/>
+            <input type="date" name="date" path="date" required/>
             <br>
+            <input type="submit" id="edit-button" value="Save"></input>
         </form>
-        <button id="edit-button">Button</button>
+
     </div>
 
     <div id ="data-container">
@@ -104,6 +105,11 @@ var loader = new YAHOO.util.YUILoader({
 
         //var myDataTable = new YAHOO.widget.DataTable("data-container", ColumnDefs, DataSource);
 
+        var editButtons = YAHOO.util.Dom.getElementsByClassName('edit-button');
+        YAHOO.util.Event.addListener(editButtons, "click", editCall);
+        var deleteButtons = YAHOO.util.Dom.getElementsByClassName('delete-button');
+        YAHOO.util.Event.addListener(deleteButtons, "click", deleteCall);
+
     },
     timeout: 0,
     combine: true
@@ -111,15 +117,32 @@ var loader = new YAHOO.util.YUILoader({
 
 loader.insert();
 
+function edited()
+{
+  var id = YAHOO.util.Dom.getElementsByClassName('id-input')[0].value;
+  var descr = YAHOO.util.Dom.getElementsByClassName('descr-input')[0].value;
+  var date = YAHOO.util.Dom.getElementsByClassName('date-input')[0].value;
+
+  var callback = {
+    success: function(e) {
+        var table = YAHOO.util.Dom.getElementsByClassName('task-table')[0].getElementsByTagName('TBODY')[0];
+        addRow(table,id,descr,date);
+
+        console.log("added succ!");
+    },
+    failure: function(e) {/*failure handler code*/},
+        argument: null
+    };
+    var transaction = YAHOO.util.Connect.asyncRequest('POST', "/add-task", callback, "taskId=" + id + "&description=" + descr + "&date=" + date);
+    return false;
+
+}
+
 function submitted()
 {
-  alert("add");
   var id = YAHOO.util.Dom.getElementsByClassName('id-input')[0].value;
-  alert(id);
   var descr = YAHOO.util.Dom.getElementsByClassName('descr-input')[0].value;
-  alert(descr);
   var date = YAHOO.util.Dom.getElementsByClassName('date-input')[0].value;
-  alert(date);
 
 
   if (!isIdValid(id))
@@ -156,11 +179,13 @@ function addRow(table, id, descr, date)
     YAHOO.util.Dom.addClass(delBtn, "delete-button");
     delBtn.innerHTML = "Delete";
     tdDelete.appendChild(delBtn);
+    YAHOO.util.Event.addListener(delBtn, "click", deleteCall);
 
     var editBtn = document.createElement('BUTTON');
     YAHOO.util.Dom.addClass(editBtn, "edit-button");
     editBtn.innerHTML = "Edit";
     tdEdit.appendChild(editBtn);
+    YAHOO.util.Event.addListener(editBtn, "click", editCall);
 
     row.appendChild(tdId);
     row.appendChild(tdDescr);
@@ -189,7 +214,6 @@ function isIdValid(id)
         ids.push(elements[i].children[0].innerHTML);
     }
 
-    alert(ids);
     if (ids.includes(id))
     {
         return false;
@@ -197,6 +221,77 @@ function isIdValid(id)
     return true;
 }
 
+
+function deleteCall(e)
+{
+    var id = getIdByButton(this);
+    var callback = {
+    success: function(e) {
+        var table = YAHOO.util.Dom.getElementsByClassName('task-table')[0].getElementsByTagName('TBODY')[0];
+        addRow(table,id,descr,date);
+
+        console.log("added succ!");
+    },
+    failure: function(e) {/*failure handler code*/},
+        argument: null
+    };
+    var transaction = YAHOO.util.Connect.asyncRequest('POST', "/add-task", callback, "taskId=" + id + "&description=" + descr + "&date=" + date);
+}
+
+function editCall(e)
+{
+    var id = getIdByButton(this);
+    var edit = YAHOO.util.Dom.getElementsByClassName('edit-task-container');
+    var add = YAHOO.util.Dom.getElementsByClassName('enter-task-container');
+    edit.setAttribute('display', 'visible');
+    add.setAttribute('display', 'none');
+    edit.children[0].children[1].innerHTML = id;
+    edit.children[0].children[3].innerHTML = getDescrByButton(this);
+    edit.children[0].children[5].innerHTML = getDateByButton(this);
+
+}
+
+function getIdByButton(button)
+{
+    if (button.innerHTML == "Delete")
+    {
+        var id = button.parentNode.previousSibling.previousSibling.previousSibling.previousSibling.innerHTML;
+        return id;
+    }
+    else
+    {
+        var id = button.parentNode.previousSibling.previousSibling.previousSibling.innerHTML;
+        return id;
+    }
+}
+
+function getDescrByButton(button)
+{
+    if (button.innerHTML == "Delete")
+    {
+        var descr = button.parentNode.previousSibling.previousSibling.previousSibling.innerHTML;
+        return descr;
+    }
+    else
+    {
+        var descr = button.parentNode.previousSibling.previousSibling.innerHTML;
+        return descr;
+    }
+}
+
+function getDateByButton(button)
+{
+    if (button.innerHTML == "Delete")
+    {
+        var descr = button.parentNode.previousSibling.previousSibling.innerHTML;
+        return descr;
+    }
+    else
+    {
+        var descr = button.parentNode.previousSibling.innerHTML;
+        return descr;
+    }
+}
 
         </script>
 
